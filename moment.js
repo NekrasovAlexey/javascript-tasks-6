@@ -69,9 +69,10 @@ module.exports = function () {
         // Выводит дату в переданном формате
         format: function (pattern) {
             var format = pattern.slice();
-            var date = intToDate(dateToInt(this.date + this.timezone));
+            var date = intToDate(dateToInt(this.date));
             format = replaceIntoString(format, '%DD', date.substr(0, 2));
-            format = replaceIntoString(format, '%HH', date.substr(3, 2));
+            var hour = parseInt(date.substr(3, 2)) + parseInt(this.timezone);
+            format = replaceIntoString(format, '%HH', hour);
             format = replaceIntoString(format, '%MM', date.substr(6, 2));
             return format;
 

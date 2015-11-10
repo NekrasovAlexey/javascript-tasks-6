@@ -25,7 +25,7 @@ module.exports.getAppropriateMoment = function (json, minDuration, workingHours)
         return period.to - period.from > minDuration / 60;
     });
     appropriateMoment.date = intToDate(freeTime[0].from);
-    appropriateMoment.timezone = 0;
+    appropriateMoment.timezone = '+5';
     return appropriateMoment;
 
     function mergeTime(time, period) {
