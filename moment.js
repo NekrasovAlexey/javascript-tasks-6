@@ -1,64 +1,8 @@
 'use strict';
 
+var utils = require('./utils');
+
 module.exports = function () {
-    function dateToInt(date) {
-        var day;
-        switch (date.substr(0, 2)) {
-            case 'ПН':
-                day = 0;
-                break;
-            case 'ВТ':
-                day = 1;
-                break;
-            case 'СР':
-                day = 2;
-                break;
-        }
-
-        return day * 24 + timeToInt(date.substr(3));
-    }
-
-    function timeToInt(time) {
-        var hour = parseInt(time.substr(0, 2));
-        if (time.substr(5, 1) == '+') {
-            hour -= parseInt(time.substr(6, 2));
-        }
-        if (time.substr(5, 1) == '-') {
-            hour += parseInt(time.substr(6, 2));
-        }
-        var minutes = parseInt(time.substr(3, 2)) / 60;
-        return hour + minutes;
-    }
-
-    function intToDate(int) {
-        var date = '';
-        switch (parseInt(int / 24)) {
-            case 0:
-                date += 'ПН';
-                break;
-            case 1:
-                date += 'ВТ';
-                break;
-            case 2:
-                date += 'СР';
-                break;
-        }
-        var time = int % 24;
-        var hour = parseInt(time);
-        if (hour < 10) {
-            date += ' 0' + hour;
-        } else {
-            date += ' ' + hour;
-        }
-        var minutes = (time - hour) * 60;
-        if (minutes < 10) {
-            date += ':0' + minutes;
-        } else {
-            date += ':' + minutes;
-        }
-        return date;
-    }
-
     return {
         // Здесь как-то хранится дата ;)
         date: null,
@@ -69,7 +13,7 @@ module.exports = function () {
         // Выводит дату в переданном формате
         format: function (pattern) {
             var format = pattern.slice();
-            var date = intToDate(dateToInt(this.date));
+            var date = utils.intToDate(utils.dateToInt(this.date));
             format = replaceIntoString(format, '%DD', date.substr(0, 2));
             var hour = parseInt(date.substr(3, 2)) + parseInt(this.timezone);
             format = replaceIntoString(format, '%HH', hour);
@@ -85,6 +29,35 @@ module.exports = function () {
         // Возвращает кол-во времени между текущей датой и переданной `moment`
         // в человекопонятном виде
         fromMoment: function (moment) {
+            var period = utils.dateToInt(this.date + this.timezone);
+            period -= utils.dateToInt(moment.date + moment.timezone);
+            return toStatus(period);
+
+            function toStatus(period) {
+                var status = 'До ограбления осталось';
+                var days = ['', ' 1 день', ' 2 дня'];
+                status += days[parseInt(period / 24)];
+                var time = period % 24;
+                var hour = parseInt(time);
+                status += toString(hour, ['час', 'часа', 'часов']);
+                var minutes = Math.round((time - hour) * 60);
+                status += toString(minutes, ['минута', 'минуты', 'минут']);
+                return status;
+            }
+
+            function toString(time, strings) {
+                var string = '';
+                if (time % 10 == 1) {
+                    string += ' ' + time + ' ' + strings[0];
+                }
+                if (time % 10 > 1 && time % 10 < 5) {
+                    string += ' ' + time + ' ' + strings[1];
+                }
+                if (time % 10 > 4 && time % 10 < 21) {
+                    string += ' ' + time + ' ' + strings[2];
+                }
+                return string;
+            }
         }
     };
 };
