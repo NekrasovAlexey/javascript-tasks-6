@@ -1,7 +1,7 @@
 'use strict';
 
 var moment = require('./moment');
-
+var utils = require('./utils');
 // Выбирает подходящий ближайший момент начала ограбления
 module.exports.getAppropriateMoment = function (json, minDuration, workingHours) {
     var appropriateMoment = moment();
@@ -11,12 +11,12 @@ module.exports.getAppropriateMoment = function (json, minDuration, workingHours)
     names.forEach(function (name) {
         var personShedule = shedule[name];
         personShedule.forEach(function (period) {
-            freeTime = mergeTime(freeTime, {from: dateToInt(period.from),
-                                            to: dateToInt(period.to)});
+            freeTime = mergeTime(freeTime, {from: utils.dateToInt(period.from),
+                                            to: utils.dateToInt(period.to)});
         });
     });
-    var workFrom = timeToInt(workingHours.from);
-    var workTo = timeToInt(workingHours.to);
+    var workFrom = utils.timeToInt(workingHours.from);
+    var workTo = utils.timeToInt(workingHours.to);
     for (var i = 0; i < 3; i++) {
         freeTime = mergeTime(freeTime, {from: 24 * i, to: workFrom + 24 * i});
         freeTime = mergeTime(freeTime, {from: workTo + 24 * i, to: 24 * (i + 1)});
@@ -24,7 +24,7 @@ module.exports.getAppropriateMoment = function (json, minDuration, workingHours)
     freeTime = freeTime.filter(function (period) {
         return period.to - period.from > minDuration / 60;
     });
-    appropriateMoment.date = intToDate(freeTime[0].from);
+    appropriateMoment.date = utils.intToDate(freeTime[0].from);
     appropriateMoment.timezone = '+5';
     return appropriateMoment;
 
@@ -50,69 +50,11 @@ module.exports.getAppropriateMoment = function (json, minDuration, workingHours)
         });
         return newTime;
     }
-
-    function dateToInt(date) {
-        var day;
-        switch (date.substr(0, 2)) {
-            case 'ПН':
-                day = 0;
-                break;
-            case 'ВТ':
-                day = 1;
-                break;
-            case 'СР':
-                day = 2;
-                break;
-        }
-
-        return day * 24 + timeToInt(date.substr(3));
-    }
-
-    function timeToInt(time) {
-        var hour = parseInt(time.substr(0, 2));
-        if (time.substr(5, 1) == '+') {
-            hour -= parseInt(time.substr(6, 2));
-        }
-        if (time.substr(5, 1) == '-') {
-            hour += parseInt(time.substr(6, 2));
-        }
-        var minutes = parseInt(time.substr(3, 2)) / 60;
-        return hour + minutes;
-    }
-
-    function intToDate(int) {
-        var date = '';
-        switch (parseInt(int / 24)) {
-            case 0:
-                date += 'ПН';
-                break;
-            case 1:
-                date += 'ВТ';
-                break;
-            case 2:
-                date += 'СР';
-                break;
-        }
-        var time = int % 24;
-        var hour = parseInt(time);
-        if (hour < 10) {
-            date += ' 0' + hour;
-        } else {
-            date += ' ' + hour;
-        }
-        var minutes = (time - hour) * 60;
-        if (minutes < 10) {
-            date += ':0' + minutes;
-        } else {
-            date += ':' + minutes;
-        }
-        return date;
-    }
 };
 
 // Возвращает статус ограбления (этот метод уже готов!)
 module.exports.getStatus = function (moment, robberyMoment) {
-    if (moment.date < robberyMoment.date) {
+    if (utils.dateToInt(moment.date) < utils.dateToInt(robberyMoment.date)) {
         // «До ограбления остался 1 день 6 часов 59 минут»
         return robberyMoment.fromMoment(moment);
     }
