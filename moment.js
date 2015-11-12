@@ -16,7 +16,7 @@ module.exports = function () {
                 return 'Ограбления не будет';
             }
             var format = pattern.slice();
-            var date = utils.intToDate(utils.dateToInt(this.date)  + parseInt(this.timezone));
+            var date = utils.intToDate(utils.dateToInt(this.date) + parseInt(this.timezone));
             format = replaceIntoString(format, '%DD', date.substr(0, 2));
             var hour = parseInt(date.substr(3, 2));
             format = replaceIntoString(format, '%HH', hour);
