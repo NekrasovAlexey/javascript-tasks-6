@@ -12,10 +12,13 @@ module.exports = function () {
 
         // Выводит дату в переданном формате
         format: function (pattern) {
+            if (this.date == null) {
+                return 'Ограбления не будет';
+            }
             var format = pattern.slice();
-            var date = utils.intToDate(utils.dateToInt(this.date));
+            var date = utils.intToDate(utils.dateToInt(this.date)  + parseInt(this.timezone));
             format = replaceIntoString(format, '%DD', date.substr(0, 2));
-            var hour = parseInt(date.substr(3, 2)) + parseInt(this.timezone);
+            var hour = parseInt(date.substr(3, 2));
             format = replaceIntoString(format, '%HH', hour);
             format = replaceIntoString(format, '%MM', date.substr(6, 2));
             return format;

@@ -6,7 +6,7 @@ var utils = require('./utils');
 module.exports.getAppropriateMoment = function (json, minDuration, workingHours) {
     var appropriateMoment = moment();
     var shedule = JSON.parse(json);
-    var freeTime = [{from: 0, to: 72}];
+    var freeTime = [{from: 24, to: 96}];
     var names = Object.keys(shedule);
     names.forEach(function (name) {
         var personShedule = shedule[name];
@@ -17,15 +17,19 @@ module.exports.getAppropriateMoment = function (json, minDuration, workingHours)
     });
     var workFrom = utils.timeToInt(workingHours.from);
     var workTo = utils.timeToInt(workingHours.to);
-    for (var i = 0; i < 3; i++) {
+    for (var i = 1; i < 4; i++) {
         freeTime = mergeTime(freeTime, {from: 24 * i, to: workFrom + 24 * i});
         freeTime = mergeTime(freeTime, {from: workTo + 24 * i, to: 24 * (i + 1)});
     }
     freeTime = freeTime.filter(function (period) {
         return period.to - period.from > minDuration / 60;
     });
-    appropriateMoment.date = utils.intToDate(freeTime[0].from);
-    appropriateMoment.timezone = '+5';
+    if (freeTime.length == 0) {
+        appropriateMoment.date = null;
+    } else {
+        appropriateMoment.date = utils.intToDate(freeTime[0].from);
+        appropriateMoment.timezone = '+5';
+    }
     return appropriateMoment;
 
     function mergeTime(time, period) {
@@ -54,6 +58,9 @@ module.exports.getAppropriateMoment = function (json, minDuration, workingHours)
 
 // Возвращает статус ограбления (этот метод уже готов!)
 module.exports.getStatus = function (moment, robberyMoment) {
+    if (robberyMoment.date == null) {
+        return 'Ограбления не будет';
+    }
     if (utils.dateToInt(moment.date) < utils.dateToInt(robberyMoment.date)) {
         // «До ограбления остался 1 день 6 часов 59 минут»
         return robberyMoment.fromMoment(moment);
