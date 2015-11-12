@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports.dateToInt = function (date) {
-    var days = ['ПН', 'ВТ', 'СР'];
+    var days = ['ВС', 'ПН', 'ВТ', 'СР', 'ЧТ'];
     return days.indexOf(date.substr(0, 2)) * 24 + this.timeToInt(date.substr(3));
 };
 
@@ -18,7 +18,7 @@ module.exports.timeToInt = function timeToInt(time) {
 };
 
 module.exports.intToDate = function (int) {
-    var days = ['ПН', 'ВТ', 'СР'];
+    var days = ['ВС', 'ПН', 'ВТ', 'СР', 'ЧТ'];
     var date = days[parseInt(int / 24)];
     var time = int % 24;
     var hour = parseInt(time);
