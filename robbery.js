@@ -22,7 +22,7 @@ module.exports.getAppropriateMoment = function (json, minDuration, workingHours)
         freeTime = mergeTime(freeTime, {from: workTo + 24 * i, to: 24 * (i + 1)});
     }
     freeTime = freeTime.filter(function (period) {
-        return period.to - period.from > minDuration / 60;
+        return period.to - period.from >= minDuration / 60;
     });
     if (freeTime.length == 0) {
         appropriateMoment.date = null;
