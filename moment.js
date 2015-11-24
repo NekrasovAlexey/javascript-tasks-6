@@ -5,18 +5,26 @@ var utils = require('./utils');
 module.exports = function () {
     return {
         // Здесь как-то хранится дата ;)
-        date: null,
-
+        dateInt: null,
+        set date(date) {
+            if (typeof date == 'string') {
+                this.dateInt = utils.dateToInt(date);
+                this.timezone = Number.parseInt(date.substr(8, 2));
+            }
+            if (typeof date == 'number') {
+                this.dateInt = date;
+            }
+        },
+        get date() {
+            return this.dateInt;
+        },
         // А здесь часовой пояс
         timezone: null,
 
         // Выводит дату в переданном формате
         format: function (pattern) {
-            if (this.date == null) {
-                return 'Ограбления не будет';
-            }
             var format = pattern.slice();
-            var date = utils.intToDate(utils.dateToInt(this.date) + parseInt(this.timezone));
+            var date = utils.intToDate(this.dateInt + parseInt(this.timezone));
             format = replaceIntoString(format, '%DD', date.substr(0, 2));
             var hour = parseInt(date.substr(3, 2));
             format = replaceIntoString(format, '%HH', hour);
@@ -32,8 +40,8 @@ module.exports = function () {
         // Возвращает кол-во времени между текущей датой и переданной `moment`
         // в человекопонятном виде
         fromMoment: function (moment) {
-            var period = utils.dateToInt(this.date + this.timezone);
-            period -= utils.dateToInt(moment.date + moment.timezone);
+            var period = this.date + this.timezone;
+            period -= moment.date + moment.timezone;
             return toStatus(period);
 
             function toStatus(period) {
