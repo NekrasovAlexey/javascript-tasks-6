@@ -17,6 +17,9 @@ module.exports.getAppropriateMoment = function (json, minDuration, workingHours)
     });
     var workFrom = utils.timeToInt(workingHours.from);
     var workTo = utils.timeToInt(workingHours.to);
+    if (workTo <= 0) {
+        workTo += 24;
+    }
     for (var i = 1; i < 4; i++) {
         freeTime = mergeTime(freeTime, {from: 24 * i, to: workFrom + 24 * i});
         freeTime = mergeTime(freeTime, {from: workTo + 24 * i, to: 24 * (i + 1)});
@@ -40,7 +43,6 @@ module.exports.getAppropriateMoment = function (json, minDuration, workingHours)
                 newPeriods.push(freePeriod);
             }
             if (freePeriod.from < period.from && freePeriod.to > period.from) {
-                //возможно нужно вычитать минуту
                 newPeriods.push({from: freePeriod.from, to: period.from});
             }
             if (freePeriod.to > period.to && freePeriod.from < period.to) {
@@ -58,10 +60,7 @@ module.exports.getAppropriateMoment = function (json, minDuration, workingHours)
 
 // Возвращает статус ограбления (этот метод уже готов!)
 module.exports.getStatus = function (moment, robberyMoment) {
-    if (robberyMoment.date == null) {
-        return 'Ограбления не будет';
-    }
-    if (utils.dateToInt(moment.date) < utils.dateToInt(robberyMoment.date)) {
+    if (moment.date < robberyMoment.date) {
         // «До ограбления остался 1 день 6 часов 59 минут»
         return robberyMoment.fromMoment(moment);
     }
